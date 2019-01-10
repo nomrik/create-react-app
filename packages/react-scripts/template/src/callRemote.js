@@ -1,4 +1,4 @@
-function callRemote(methodName, params) {
+function callRemote(methodName = '', params = []) {
     const vf = window.Visualforce;
     if (!vf) {
         throw new Error('Could not find VisualForce');
@@ -10,7 +10,7 @@ function callRemote(methodName, params) {
             ...params,
             (result, event) => {
                 if (event.status) {
-                    resolve(JSON.parse(result))
+                    resolve(result)
                 }
             },
             {
