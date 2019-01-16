@@ -99,6 +99,8 @@ module.exports = function(
     build: 'react-scripts build',
     test: 'react-scripts test',
     eject: 'react-scripts eject',
+    deploy: 'react-scripts deploy',
+    build_deploy: 'react-scripts build && react-scripts deploy',
   };
 
   // Setup the eslint config
