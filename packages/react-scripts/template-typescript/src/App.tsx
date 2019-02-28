@@ -7,7 +7,7 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           <p>
-            Edit <code>src/App.js</code> and save to reload.
+            Edit <code>src/App.tsx</code> and save to reload.
           </p>
           <p>
             Import callRemote to call apex methods.

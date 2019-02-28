@@ -7,11 +7,13 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           <p>
-            Edit <code>src/App.js</code> and save to reload.
+            Have a look in <code>README.md</code> for insturctions to hook up
+            the React project to Salesforce.
           </p>
           <p>
-            Import callRemote to call apex methods.
+            Edit <code>src/App.js</code> and save to reload.
           </p>
+          <p>Import callRemote to call apex methods.</p>
           <a
             className="App-link"
             href="https://reactjs.org"
