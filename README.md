@@ -1,203 +1,82 @@
-# Create React App [![Build Status](https://travis-ci.org/facebook/create-react-app.svg?branch=master)](https://travis-ci.org/facebook/create-react-app) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-green.svg)](https://github.com/facebook/create-react-app/pulls)
+## Overview
 
-Create React apps with no build configuration.
+This project is a fork of [create-react-app](https://github.com/facebook/create-react-app), that is meant to be used to bootstrap a React project inside Salesforce, via Visualforce page integration. Please refer to the main repo for any information and help, other than the details below.
 
-- [Creating an App](#creating-an-app) – How to create a new app.
-- [User Guide](https://facebook.github.io/create-react-app/) – How to develop apps bootstrapped with Create React App.
+## Quick start
 
-Create React App works on macOS, Windows, and Linux.<br>
-If something doesn’t work, please [file an issue](https://github.com/facebook/create-react-app/issues/new).
+Run the following command from a terminal:
 
-## Quick Overview
+`npx create-react-app <your-project-name> --scripts-version react-scripts-sf`
 
-```sh
-npx create-react-app my-app
-cd my-app
-npm start
-```
+> More information on [npx](https://medium.com/@maybekatz/introducing-npx-an-npm-package-runner-55f7d4bd282b)
 
-_([npx](https://medium.com/@maybekatz/introducing-npx-an-npm-package-runner-55f7d4bd282b) comes with npm 5.2+ and higher, see [instructions for older npm versions](https://gist.github.com/gaearon/4064d3c23a77c74a3614c498a8bb1c5f))_
+This will create a CRA React project, with several Salesforce specific files added:
 
-Then open [http://localhost:3000/](http://localhost:3000/) to see your app.<br>
-When you’re ready to deploy to production, create a minified bundle with `npm run build`.
+- **sfConfig.js** - this file is a local untracked file, that stores the Salesforce configuration. It has the following fields:
 
-<p align='center'>
-<img src='https://cdn.rawgit.com/facebook/create-react-app/27b42ac/screencast.svg' width='600' alt='npm start'>
-</p>
+  - **SF_USERNAME** - your username
+  - **SF_PASSWORD** - your password
+  - **SF_TOKEN** - your security token. If you don't have one, follow [this link](https://help.salesforce.com/apex/HTViewHelpDoc?id=user_security_token.htm)
+    **SF_CONTROLLER_NAME** - the name of the Apex controller you want to use with your app
+    > Note: you will still be able to call methods from multiple controllers
 
-### Get Started Immediately
+- **src/callRemote.js** - this is a utility function to interact with your Apex controller. To use it, simply import it to any file, and call it with the methodName (including its controller name) as the first argument, and an array of parameters as the second argument. It will return a Promise with the response from your controller.
 
-You **don’t** need to install or configure tools like Webpack or Babel.<br>
-They are preconfigured and hidden so that you can focus on the code.
+  Example usage:
 
-Just create a project, and you’re good to go.
+  ```javascript
+  import callRemote from './callRemote';
 
-## Creating an App
+  async function logAllUsers() {
+    const users = await callRemote('MyController.getUsers');
+    console.log(users); // [{ Name: '..', Id: '..' }, { Name: '..', Id: '..' }
+  }
 
-**You’ll need to have Node 8.10.0 or later on your local development machine** (but it’s not required on the server). You can use [nvm](https://github.com/creationix/nvm#installation) (macOS/Linux) or [nvm-windows](https://github.com/coreybutler/nvm-windows#node-version-manager-nvm-for-windows) to easily switch Node versions between different projects.
+  async function logUser(name) {
+    const user = await callRemote('MyController.getUserByName', name);
+    console.log(user); // { Name: '..', Id: '..' }
+  }
+  ```
 
-To create a new app, you may choose one of the following methods:
+  Or inside a React component:
 
-### npx
+  ```javascript
+  class MyComponent extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = { users: [] };
+    }
 
-```sh
-npx create-react-app my-app
-```
+    async componentDidMount() {
+      const users = await callRemote('MyController.getUsers');
+      this.setState({ users });
+    }
+  }
+  ```
 
-_([npx](https://medium.com/@maybekatz/introducing-npx-an-npm-package-runner-55f7d4bd282b) comes with npm 5.2+ and higher, see [instructions for older npm versions](https://gist.github.com/gaearon/4064d3c23a77c74a3614c498a8bb1c5f))_
+- **public/index.page** - this is the Visualforce page. It will be automatically deployed to Salesforce (in the next section of this document), with all the values filled in from the configuration file. You can customize other aspects of the page here manually.
 
-### npm
+## Deployment
 
-```sh
-npm init react-app my-app
-```
+There are two additional scripts to this package:
 
-_`npm init <initializer>` is available in npm 6+_
+- `build_deploy` - builds the project, deploys it as a static resource (by the name of the project), and finally deploys the Visualforce page.
+- `deploy` - same as `build_deploy`, but does not build the project, only deploys.
 
-### Yarn
+As a starting point, run `yarn build_deploy` from the project's root. You can then open and preview the Visualforce page in Salesforce, and you will see the app. After the initial deployment, you can begin developing locally.
 
-```sh
-yarn create react-app my-app
-```
+## Running locally
 
-_`yarn create` is available in Yarn 0.25+_
+In order to run the app locally, a tunneling tool such as [ngrok](https://ngrok.com/) needs to be utilized. After you installed `ngrok`, follow these steps to run the app locally:
 
-It will create a directory called `my-app` inside the current folder.<br>
-Inside that directory, it will generate the initial project structure and install the transitive dependencies:
+- Run `yarn start` from the project's root. This will start the webpack devserver on port 3000 (you can change the port if you wish)
+- From a separate terminal, navigate to the folder you installed `ngrok` and run `ngrok http 3000`. This will start a tunnel, forwarding network requests to your `localhost`
+- Copy the first hash in your ngrok address (will show up in the terminal), and paste it instead of the `YOUR_NGROK` placeholder in the **deployed** Visualforce page (through the developer console/IDE)
+- Uncomment the tags under `<!--Dev-->` and comment the ones under `<!--Prod>`
+- You should now be able to see the app if you preview the Visualforce page. If you make changes to the app, your local devserver will recompile the app, and you can refresh the browser in the Visualforce page and witness your changes.
 
-```
-my-app
-├── README.md
-├── node_modules
-├── package.json
-├── .gitignore
-├── public
-│   ├── favicon.ico
-│   ├── index.html
-│   └── manifest.json
-└── src
-    ├── App.css
-    ├── App.js
-    ├── App.test.js
-    ├── index.css
-    ├── index.js
-    ├── logo.svg
-    └── serviceWorker.js
-```
+**IMPORTANT: before you try and run the app locally, you have to deploy at least once in order to have the Visualforce page in your Salesforce org**
 
-No configuration or complicated folder structures, just the files you need to build your app.<br>
-Once the installation is done, you can open your project folder:
+## Issues
 
-```sh
-cd my-app
-```
-
-Inside the newly created project, you can run some built-in commands:
-
-### `npm start` or `yarn start`
-
-Runs the app in development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will automatically reload if you make changes to the code.<br>
-You will see the build errors and lint warnings in the console.
-
-<p align='center'>
-<img src='https://cdn.rawgit.com/marionebl/create-react-app/9f62826/screencast-error.svg' width='600' alt='Build errors'>
-</p>
-
-### `npm test` or `yarn test`
-
-Runs the test watcher in an interactive mode.<br>
-By default, runs tests related to files changed since the last commit.
-
-[Read more about testing.](https://facebook.github.io/create-react-app/docs/running-tests)
-
-### `npm run build` or `yarn build`
-
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br>
-
-Your app is ready to be deployed.
-
-## User Guide
-
-You can find detailed instructions on using Create React App and many tips in [its documentation](https://facebook.github.io/create-react-app/).
-
-## How to Update to New Versions?
-
-Please refer to the [User Guide](https://facebook.github.io/create-react-app/docs/updating-to-new-releases) for this and other information.
-
-## Philosophy
-
-- **One Dependency:** There is just one build dependency. It uses Webpack, Babel, ESLint, and other amazing projects, but provides a cohesive curated experience on top of them.
-
-- **No Configuration Required:** You don't need to configure anything. A reasonably good configuration of both development and production builds is handled for you so you can focus on writing code.
-
-- **No Lock-In:** You can “eject” to a custom setup at any time. Run a single command, and all the configuration and build dependencies will be moved directly into your project, so you can pick up right where you left off.
-
-## What’s Included?
-
-Your environment will have everything you need to build a modern single-page React app:
-
-- React, JSX, ES6, TypeScript and Flow syntax support.
-- Language extras beyond ES6 like the object spread operator.
-- Autoprefixed CSS, so you don’t need `-webkit-` or other prefixes.
-- A fast interactive unit test runner with built-in support for coverage reporting.
-- A live development server that warns about common mistakes.
-- A build script to bundle JS, CSS, and images for production, with hashes and sourcemaps.
-- An offline-first [service worker](https://developers.google.com/web/fundamentals/getting-started/primers/service-workers) and a [web app manifest](https://developers.google.com/web/fundamentals/engage-and-retain/web-app-manifest/), meeting all the [Progressive Web App](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app) criteria. (_Note: Using the service worker is opt-in as of `react-scripts@2.0.0` and higher_)
-- Hassle-free updates for the above tools with a single dependency.
-
-Check out [this guide](https://github.com/nitishdayal/cra_closer_look) for an overview of how these tools fit together.
-
-The tradeoff is that **these tools are preconfigured to work in a specific way**. If your project needs more customization, you can ["eject"](https://facebook.github.io/create-react-app/docs/available-scripts#npm-run-eject) and customize it, but then you will need to maintain this configuration.
-
-## Popular Alternatives
-
-Create React App is a great fit for:
-
-- **Learning React** in a comfortable and feature-rich development environment.
-- **Starting new single-page React applications.**
-- **Creating examples** with React for your libraries and components.
-
-Here are few common cases where you might want to try something else:
-
-- If you want to **try React** without hundreds of transitive build tool dependencies, consider [using a single HTML file or an online sandbox instead](https://reactjs.org/docs/try-react.html).
-
-- If you need to **integrate React code with a server-side template framework** like Rails, Django or Symfony, or if you’re **not building a single-page app**, consider using [nwb](https://github.com/insin/nwb), or [Neutrino](https://neutrino.js.org/) which are more flexible. For Rails specifically, you can use [Rails Webpacker](https://github.com/rails/webpacker). For Symfony, try [Symfony's Webpack Encore](https://symfony.com/doc/current/frontend/encore/reactjs.html).
-
-- If you need to **publish a React component**, [nwb](https://github.com/insin/nwb) can [also do this](https://github.com/insin/nwb#react-components-and-libraries), as well as [Neutrino's react-components preset](https://neutrino.js.org/packages/react-components/).
-
-- If you want to do **server rendering** with React and Node.js, check out [Next.js](https://github.com/zeit/next.js/) or [Razzle](https://github.com/jaredpalmer/razzle). Create React App is agnostic of the backend, and just produces static HTML/JS/CSS bundles.
-
-- If your website is **mostly static** (for example, a portfolio or a blog), consider using [Gatsby](https://www.gatsbyjs.org/) instead. Unlike Create React App, it pre-renders the website into HTML at the build time.
-
-- Finally, if you need **more customization**, check out [Neutrino](https://neutrino.js.org/) and its [React preset](https://neutrino.js.org/packages/react/).
-
-All of the above tools can work with little to no configuration.
-
-If you prefer configuring the build yourself, [follow this guide](https://reactjs.org/docs/add-react-to-an-existing-app.html).
-
-## Contributing
-
-We'd love to have your helping hand on `create-react-app`! See [CONTRIBUTING.md](CONTRIBUTING.md) for more information on what we're looking for and how to get started.
-
-## React Native
-
-Looking for something similar, but for React Native?<br>
-Check out [Expo CLI](https://github.com/expo/expo-cli).
-
-## Acknowledgements
-
-We are grateful to the authors of existing related projects for their ideas and collaboration:
-
-- [@eanplatter](https://github.com/eanplatter)
-- [@insin](https://github.com/insin)
-- [@mxstbr](https://github.com/mxstbr)
-
-## License
-
-Create React App is open source software [licensed as MIT](https://github.com/facebook/create-react-app/blob/master/LICENSE).
+Please note any issues you are having in the [issues](https://github.com/nomrik/create-react-app/issues) page.
