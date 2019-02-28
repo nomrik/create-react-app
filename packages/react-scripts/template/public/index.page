@@ -1,0 +1,29 @@
+<apex:page standardStylesheets="false" showHeader="false" docType="html-5.0" controller="{CONTROLLER_NAME}">
+
+    <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <head>
+        <meta charset="UTF-8" />
+        <title>{STATIC_RESOURCE_NAME}</title>
+
+        <!--Prod-->
+        <apex:stylesheet value="{!URLFOR($Resource.{STATIC_RESOURCE_NAME},'css/main.css')}" />
+
+        <!--Dev-->
+        <!--apex:stylesheet value="https://YOUR_NGROK.ngrok.io/static/css/main.js" /-->
+
+    </head>
+
+
+    <body>
+    <div id="root" class="slds" />
+	
+    <!--Prod-->
+    <script src="{!URLFOR($Resource.{STATIC_RESOURCE_NAME},'js/bundle.js')}" />
+
+    <!--Dev-->
+    <!--script src="https://YOUR_NGROK.ngrok.io/static/js/bundle.js"/-->
+
+    </body>
+        
+    </html>
+</apex:page>
