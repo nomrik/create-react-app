@@ -8,7 +8,7 @@ function callRemote(methodName: string = '', params: string[] = []) {
     vf.remoting.Manager.invokeAction(
       methodName,
       ...params,
-      (result, event) => {
+      (result: any, event: any) => {
         if (event.status) {
           resolve && resolve(result);
         } else {
