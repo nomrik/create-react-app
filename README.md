@@ -9,6 +9,7 @@ Run the following command from a terminal:
 `npx create-react-app <your-project-name> --scripts-version react-scripts-sf`
 
 > More information on [npx](https://medium.com/@maybekatz/introducing-npx-an-npm-package-runner-55f7d4bd282b)
+> **IMPORTANT** Make sure to name your project by the follosing convention, as it will be used for the name of the StaticResource in SalesForce: *The name can only contain underscores and alphanumeric characters. It must begin with a letter and be unique, and must not include spaces, end with an underscore, or contain two consecutive underscores*
 
 This will create a CRA React project, with several Salesforce specific files added:
 
