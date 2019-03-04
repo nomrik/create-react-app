@@ -10,9 +10,9 @@ function callRemote(methodName = '', params = []) {
       ...params,
       (result, event) => {
         if (event.status) {
-          resolve(result);
+          resolve && resolve(result);
         } else {
-          reject(result);
+          reject && reject(result);
         }
       },
       {

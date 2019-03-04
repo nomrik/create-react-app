@@ -1,18 +1,18 @@
-function callRemote(methodName = '', params = []) {
-  const vf = window.Visualforce;
+function callRemote(methodName: string = '', params: string[] = []) {
+  const vf = (<any>window).Visualforce;
   if (!vf) {
     throw new Error('Could not find VisualForce');
   }
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve?: Function, reject?: Function) => {
     vf.remoting.Manager.invokeAction(
       methodName,
       ...params,
       (result, event) => {
         if (event.status) {
-          resolve(result);
+          resolve && resolve(result);
         } else {
-          reject(result);
+          reject && reject(result);
         }
       },
       {

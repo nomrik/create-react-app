@@ -9,7 +9,7 @@
         <apex:stylesheet value="{!URLFOR($Resource.{STATIC_RESOURCE_NAME},'css/main.css')}" />
 
         <!--Dev-->
-        <!--apex:stylesheet value="https://YOUR_NGROK.ngrok.io/static/css/main.js" /-->
+        <!--apex:stylesheet value="https://YOUR_NGROK.ngrok.io/static/css/main.css" /-->
 
     </head>
 
