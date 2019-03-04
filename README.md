@@ -17,7 +17,7 @@ This will create a CRA React project, with several Salesforce specific files add
   - **SF_USERNAME** - your username
   - **SF_PASSWORD** - your password
   - **SF_TOKEN** - your security token. If you don't have one, follow [this link](https://help.salesforce.com/apex/HTViewHelpDoc?id=user_security_token.htm)
-    **SF_CONTROLLER_NAME** - the name of the Apex controller you want to use with your app
+  - **SF_CONTROLLER_NAME** - the name of the Apex controller you want to use with your app
     > Note: you will still be able to call methods from multiple controllers
 
 - **src/callRemote.js** - this is a utility function to interact with your Apex controller. To use it, simply import it to any file, and call it with the methodName (including its controller name) as the first argument, and an array of parameters as the second argument. It will return a Promise with the response from your controller.
