@@ -87,7 +87,7 @@ async function deployVisualforce(cb, isDev = false, port = 3000) {
   }
   return new Promise((resolve, reject) => {
     gulp
-      .src('build/index.page')
+      .src('public/index.page')
       .pipe(replace('{STATIC_RESOURCE_NAME}', appName))
       .pipe(
         replace(
