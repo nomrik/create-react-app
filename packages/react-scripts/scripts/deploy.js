@@ -87,16 +87,25 @@ async function deployVisualforce(cb, isDev = false, port = 3000) {
   }
   return new Promise((resolve, reject) => {
     gulp
-      .src('public/index.page')
+      .src('build/index.page')
       .pipe(replace('{STATIC_RESOURCE_NAME}', appName))
-      .pipe(replace('{PROD_SCRIPT_TAG_START}', isDev ? '!--script' : 'script'))
-      .pipe(replace('{DEV_SCRIPT_TAG_START}', isDev ? 'script' : '!--script'))
-      .pipe(replace('{PROD_SCRIPT_TAG_END}', isDev ? '--' : ''))
-      .pipe(replace('{DEV_SCRIPT_TAG_END}', isDev ? '' : '--'))
-      .pipe(replace('{PROD_STYLE_TAG_START}', isDev ? '!--apex' : 'apex'))
-      .pipe(replace('{DEV_STYLE_TAG_START}', isDev ? 'apex' : '!--apex'))
-      .pipe(replace('{PROD_STYLE_TAG_END}', isDev ? '--' : ''))
-      .pipe(replace('{DEV_STYLE_TAG_END}', isDev ? '' : '--'))
+      .pipe(
+        replace(
+          '{PROD_SCRIPT_TAG_START}',
+          isDev || dev ? '!--script' : 'script'
+        )
+      )
+      .pipe(
+        replace('{DEV_SCRIPT_TAG_START}', isDev || dev ? 'script' : '!--script')
+      )
+      .pipe(replace('{PROD_SCRIPT_TAG_END}', isDev || dev ? '--' : ''))
+      .pipe(replace('{DEV_SCRIPT_TAG_END}', isDev || dev ? '' : '--'))
+      .pipe(
+        replace('{PROD_STYLE_TAG_START}', isDev || dev ? '!--apex' : 'apex')
+      )
+      .pipe(replace('{DEV_STYLE_TAG_START}', isDev || dev ? 'apex' : '!--apex'))
+      .pipe(replace('{PROD_STYLE_TAG_END}', isDev || dev ? '--' : ''))
+      .pipe(replace('{DEV_STYLE_TAG_END}', isDev || dev ? '' : '--'))
       .pipe(replace('{CONTROLLER_NAME}', sfConfig.SF_CONTROLLER_NAME))
       .pipe(replace('{NGROK_URL}', url))
       .pipe(
@@ -123,4 +132,6 @@ function deployApp() {
 
 exports.deployVisualforce = deployVisualforce;
 
-gulp.series(deployApp, deployVisualforce)();
+if (require.main === module) {
+  gulp.series(deployApp, deployVisualforce)();
+}
