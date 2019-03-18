@@ -6,10 +6,10 @@
         <title>{STATIC_RESOURCE_NAME}</title>
 
         <!--Prod-->
-        <apex:stylesheet value="{!URLFOR($Resource.{STATIC_RESOURCE_NAME},'css/main.css')}" />
+        <{PROD_STYLE_TAG_START}:stylesheet value="{!URLFOR($Resource.{STATIC_RESOURCE_NAME},'css/main.css')}"/{PROD_STYLE_TAG_END}>
 
         <!--Dev-->
-        <!--apex:stylesheet value="https://YOUR_NGROK.ngrok.io/static/css/main.css" /-->
+        <{DEV_STYLE_TAG_START}:stylesheet value="{NGROK_URL}/static/css/main.css"/{DEV_STYLE_TAG_END}>
 
     </head>
 
@@ -18,10 +18,10 @@
     <div id="root" class="slds" />
 	
     <!--Prod-->
-    <script src="{!URLFOR($Resource.{STATIC_RESOURCE_NAME},'js/bundle.js')}" />
+    <{PROD_SCRIPT_TAG_START} src="{!URLFOR($Resource.{STATIC_RESOURCE_NAME},'js/bundle.js')}"/{PROD_SCRIPT_TAG_END}>
 
     <!--Dev-->
-    <!--script src="https://YOUR_NGROK.ngrok.io/static/js/bundle.js"/-->
+    <{DEV_SCRIPT_TAG_START} src="{NGROK_URL}/static/js/bundle.js"/{DEV_SCRIPT_TAG_END}>
 
     </body>
         
