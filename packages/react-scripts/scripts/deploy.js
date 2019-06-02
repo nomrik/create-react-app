@@ -16,21 +16,23 @@ const token = sfConfig.SF_TOKEN;
 const loginUrl = 'https://test.salesforce.com';
 const { dev } = argv;
 
-const buildMeta = ({ type, file }) => {
+const resourceName = sfConfig.VF_NAME;
+
+const buildMeta = ({ type, file, isDev }) => {
   switch (type) {
     case 'StaticResource':
       return {
-        fullName: appName,
+        fullName: isDev || dev ? resourceName : appName,
         content: file.contents.toString('base64'),
         contentType: 'application/zip',
         cacheControl: 'public',
       };
     case 'ApexPage':
       return {
-        fullName: appName,
+        fullName: isDev || dev ? resourceName : appName,
         content: file.contents.toString('base64'),
         apiVersion: '45.0',
-        label: appName,
+        label: isDev || dev ? resourceName : appName,
       };
   }
 };
@@ -41,7 +43,7 @@ const forceDeploy = ({ type = 'StaticResource', isDev, ngrokUrl }) => {
     const conn = new jsforce.Connection({
       loginUrl,
     });
-    const meta = [buildMeta({ type, file })];
+    const meta = [buildMeta({ type, file, isDev: isDev || dev })];
     conn.login(username, password + token, function(err, userInfo) {
       if (err) {
         console.error(err);
@@ -54,13 +56,17 @@ const forceDeploy = ({ type = 'StaticResource', isDev, ngrokUrl }) => {
         if (result.success) {
           if (type === 'StaticResource') {
             console.log(
-              `\nDeployed React application (${appName}) successfully`
+              `\nDeployed React application (${
+                isDev || dev ? resourceName : appName
+              }) successfully`
             );
           } else if (type === 'ApexPage') {
             console.log(
-              `\nDeployed Visualforce page (${appName}) successfully`
+              `\nDeployed Visualforce page (${
+                isDev || dev ? resourceName : appName
+              }) successfully`
             );
-            if (isDev) {
+            if (isDev || dev) {
               console.log('\nRunning ngrok at: ' + ngrokUrl);
             }
           }
@@ -69,7 +75,9 @@ const forceDeploy = ({ type = 'StaticResource', isDev, ngrokUrl }) => {
             console.log(file.contents.toString());
           }
           console.log(
-            `\nErrors in deploying ${type} (${appName}): `,
+            `\nErrors in deploying ${type} (${
+              isDev || dev ? resourceName : appName
+            }): `,
             result.errors
           );
         }
@@ -88,7 +96,9 @@ async function deployVisualforce(cb, isDev = false, port = 3000) {
   return new Promise((resolve, reject) => {
     gulp
       .src('public/index.page')
-      .pipe(replace('{STATIC_RESOURCE_NAME}', appName))
+      .pipe(
+        replace('{STATIC_RESOURCE_NAME}', isDev || dev ? resourceName : appName)
+      )
       .pipe(
         replace(
           '{PROD_SCRIPT_TAG_START}',
@@ -111,7 +121,7 @@ async function deployVisualforce(cb, isDev = false, port = 3000) {
       .pipe(
         forceDeploy({
           type: 'ApexPage',
-          isDev: dev,
+          isDev: isDev || dev,
           ngrokUrl: url,
         })
       )
@@ -122,7 +132,7 @@ async function deployVisualforce(cb, isDev = false, port = 3000) {
 function deployApp() {
   return gulp
     .src('build/static/**/*')
-    .pipe(zip(`${appName}.zip`))
+    .pipe(zip(`${dev ? resourceName : appName}.zip`))
     .pipe(
       forceDeploy({
         type: 'StaticResource',
