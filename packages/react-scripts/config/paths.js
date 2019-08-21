@@ -91,6 +91,9 @@ module.exports = {
   appNodeModules: resolveApp('node_modules'),
   publicUrl: getPublicUrl(resolveApp('package.json')),
   servedPath: getServedPath(resolveApp('package.json')),
+  appVisualForce: resolveApp('public/vf.html'),
+  devVisualForce: resolveApp('dist/vf.page'),
+  prodVisualForce: resolveApp('build/vf.page'),
 };
 
 // @remove-on-eject-begin
@@ -137,7 +140,7 @@ if (
     appPath: resolveApp('.'),
     appBuild: resolveOwn('../../build'),
     appPublic: resolveOwn('template/public'),
-    sfConfig: resolveApp('sfConfig.js'),
+    sfConfig: resolveApp('template/sfConfig.js'),
     appHtml: resolveOwn('template/public/index.html'),
     appIndexJs: resolveModule(resolveOwn, 'template/src/index'),
     appPackageJson: resolveOwn('package.json'),
@@ -154,6 +157,9 @@ if (
     ownNodeModules: resolveOwn('node_modules'),
     appTypeDeclarations: resolveOwn('template/src/react-app-env.d.ts'),
     ownTypeDeclarations: resolveOwn('lib/react-app.d.ts'),
+    appVisualForce: resolveOwn('template/public/vf.html'),
+    devVisualForce: resolveOwn('dist/vf.page'),
+    prodVisualForce: resolveOwn('../../build/vf.page'),
   };
 }
 // @remove-on-eject-end
