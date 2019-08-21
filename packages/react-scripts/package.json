@@ -1,6 +1,6 @@
 {
   "name": "react-scripts-sf",
-  "version": "2.14.0",
+  "version": "2.15.0",
   "description": "Configuration and scripts for Create React App.",
   "repository": "nomrik/create-react-app",
   "license": "MIT",
@@ -58,7 +58,7 @@
     "jest-resolve": "23.6.0",
     "jsforce": "^1.9.1",
     "mini-css-extract-plugin": "0.4.3",
-    "ngrok": "^3.1.1",
+    "ngrok": "3.2.5",
     "optimize-css-assets-webpack-plugin": "5.0.1",
     "pnp-webpack-plugin": "1.2.1",
     "postcss-flexbugs-fixes": "4.1.0",

@@ -244,13 +244,12 @@ module.exports = function(webpackEnv) {
       // https://twitter.com/wSokra/status/969633336732905474
       // https://medium.com/webpack/webpack-4-code-splitting-chunk-graph-and-the-splitchunks-optimization-be739a861366
       splitChunks: {
-        cacheGroups: {
-          default: false,
-        },
+        chunks: 'all',
+        name: false,
       },
       // Keep the runtime chunk separated to enable long term caching
       // https://twitter.com/wSokra/status/969679223278505985
-      runtimeChunk: false,
+      runtimeChunk: true,
     },
     resolve: {
       // This allows you to set a fallback for where Webpack should look for modules.
@@ -523,6 +522,34 @@ module.exports = function(webpackEnv) {
           {
             inject: true,
             template: paths.appHtml,
+          },
+          isEnvProduction
+            ? {
+                minify: {
+                  removeComments: true,
+                  collapseWhitespace: true,
+                  removeRedundantAttributes: true,
+                  useShortDoctype: true,
+                  removeEmptyAttributes: true,
+                  removeStyleLinkTypeAttributes: true,
+                  keepClosingSlash: true,
+                  minifyJS: true,
+                  minifyCSS: true,
+                  minifyURLs: true,
+                },
+              }
+            : undefined
+        )
+      ),
+      new HtmlWebpackPlugin(
+        Object.assign(
+          {},
+          {
+            inject: true,
+            template: paths.appVisualForce,
+            filename: 'vf.page',
+            // VisualForce requires xhtml standards
+            xhtml: true,
           },
           isEnvProduction
             ? {

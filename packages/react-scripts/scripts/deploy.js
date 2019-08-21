@@ -14,6 +14,7 @@ const username = sfConfig.SF_USERNAME;
 const password = sfConfig.SF_PASSWORD;
 const token = sfConfig.SF_TOKEN;
 const loginUrl = 'https://test.salesforce.com';
+const tunnelName = `${appName}-ngrok-tunnel`;
 const { dev } = argv;
 
 const resourceName = sfConfig.VF_NAME;
@@ -90,34 +91,46 @@ const forceDeploy = ({ type = 'StaticResource', isDev, ngrokUrl }) => {
 
 async function deployVisualforce(cb, isDev = false, port = 3000) {
   let url = '{NGROK_URL}';
+
   if (isDev || dev) {
-    url = await ngrok.connect(port);
+    const api = ngrok.getApi();
+    if (api) {
+      const tunnelsJson = await api.get('api/tunnels');
+      const { tunnels } = JSON.parse(tunnelsJson);
+      const tunnel = tunnels.find(tunnel => tunnel.name === tunnelName);
+      if (tunnel) {
+        url = tunnel.public_url;
+      } else {
+        url = await ngrok.connect({
+          addr: port,
+          name: tunnelName,
+        });
+      }
+    } else {
+      url = await ngrok.connect({
+        addr: port,
+        name: tunnelName,
+      });
+    }
   }
   return new Promise((resolve, reject) => {
     gulp
-      .src('public/index.page')
+      .src(isDev ? paths.devVisualForce : paths.prodVisualForce)
       .pipe(
         replace('{STATIC_RESOURCE_NAME}', isDev || dev ? resourceName : appName)
       )
+      .pipe(replace('{CONTROLLER_NAME}', sfConfig.SF_CONTROLLER_NAME))
+      .pipe(replace('<link href', '<apex:stylesheet value'))
+      .pipe(replace('rel="stylesheet"', ''))
       .pipe(
         replace(
-          '{PROD_SCRIPT_TAG_START}',
-          isDev || dev ? '!--script' : 'script'
+          isDev ? '/static/' : /"\/static\/((?:css|js)\/.*?.(?:css|js))"/g,
+          isDev
+            ? url + '/static/'
+            : (match, fileName) =>
+                `"{!URLFOR($Resource.${appName}, '${fileName}')}"`
         )
       )
-      .pipe(
-        replace('{DEV_SCRIPT_TAG_START}', isDev || dev ? 'script' : '!--script')
-      )
-      .pipe(replace('{PROD_SCRIPT_TAG_END}', isDev || dev ? '--' : ''))
-      .pipe(replace('{DEV_SCRIPT_TAG_END}', isDev || dev ? '' : '--'))
-      .pipe(
-        replace('{PROD_STYLE_TAG_START}', isDev || dev ? '!--apex' : 'apex')
-      )
-      .pipe(replace('{DEV_STYLE_TAG_START}', isDev || dev ? 'apex' : '!--apex'))
-      .pipe(replace('{PROD_STYLE_TAG_END}', isDev || dev ? '--' : ''))
-      .pipe(replace('{DEV_STYLE_TAG_END}', isDev || dev ? '' : '--'))
-      .pipe(replace('{CONTROLLER_NAME}', sfConfig.SF_CONTROLLER_NAME))
-      .pipe(replace('{NGROK_URL}', url))
       .pipe(
         forceDeploy({
           type: 'ApexPage',
@@ -125,13 +138,14 @@ async function deployVisualforce(cb, isDev = false, port = 3000) {
           ngrokUrl: url,
         })
       )
+      .on('error', reject)
       .on('end', resolve);
   });
 }
 
 function deployApp() {
   return gulp
-    .src('build/static/**/*')
+    .src(paths.appBuild + '/static/**/*')
     .pipe(zip(`${dev ? resourceName : appName}.zip`))
     .pipe(
       forceDeploy({
